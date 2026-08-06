@@ -83,10 +83,30 @@ jhyy_OS/
 | `docs/design-log.md` | 持续记录 | 完整头脑风暴 + 决策链路(2026-08-03 ~ 08-04)|
 | `docs/highlights-*.md` | 持续更新 | 8 killer features(技术 + 白话)|
 
+## 提交规则(参照 [JiHuiYiYou/docs/internal/conventions.md](https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/docs/internal/conventions.md) § 提交规则)
+
+1. **commit message 用中文概述** —— 单行 summary + 结构化 body(变更点 / 验证 / 引用)
+2. **必须带 footer**:
+   ```
+   Co-Authored-By: MiniMax-M3 <noreply@MiniMax>
+   ```
+3. **每个 sprint 一个 commit**(sprint-level change 不拆散;bug fix 可单 commit)
+4. **作者身份**:`JHYY <15901598712@163.com>`(系统 prompt 不让改 git config,用 env vars 单次指定):
+   ```bash
+   GIT_AUTHOR_NAME=JHYY \
+   GIT_AUTHOR_EMAIL=15901598712@163.com \
+   GIT_COMMITTER_NAME=JHYY \
+   GIT_COMMITTER_EMAIL=15901598712@163.com \
+   git commit -m "..."
+   ```
+5. **禁止提交构建产物**:`*.exe` / `*.o` / `*.il` / `*.s` / `*.EFI` / `*.img` / `*.log` 等(已在 `.gitignore`)
+
+完整规则 + memory 索引见 [[feedback-commit-convention]]。
+
 ## v0.0.0 已锁决策
 
 - 仓库路径:本目录
-- git:暂不开(用户明确"不着急")
+- git:已开(2026-08-06 起,`4db637f` 是基础设施 commit)
 - v0.0.0 内容:纯设计 doc,0 行代码(已落盘 → `docs/`)
 - OS 源码语言:纯 JHYY(不允许 C / asm / Rust 重写层)
 - 架构:微内核 + amd64 only v0.x + UEFI only + capability-based(详见 `docs/v0.0.0-design.md` § 4)
