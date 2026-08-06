@@ -1,0 +1,34 @@
+# v0.x 时代 src/ / build/ 还没建 —— 预留 ignore 占位
+src/
+build/
+*.o
+*.exe
+*.ilk
+*.pdb
+
+# 临时调试 / 一次性 artifact（下划线前缀）
+_*.txt
+_*.py
+_*.s
+_*.il
+_*.exe
+_*_test.jhyy
+_*_min.jhyy
+_*_minimal_*.jhyy
+
+# spike/ 里 QEMU 镜像 + 串口 log 等构建产物
+# boot.s / wrap_gpt.py / BOOTX64.EFI / esp_root/ 当模板保留
+spike/*.img
+spike/*.log
+spike/serial.log
+spike/qemu.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Claude Code 本地配置（按 CLAUDE.md，仅当需要项目级配置时创建）
+.claude
+
+# codegraph 索引（daemon.pid mtime 抖动会污染 git status）
+.codegraph/
