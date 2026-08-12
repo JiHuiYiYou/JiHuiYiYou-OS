@@ -683,7 +683,7 @@ v1.0 closure
 |------|--------------|------|------|---------|
 | jhyy lang-spec | § 18(待增)| `Cap<T>` 定义 + 8 条编译期规则 | ⏳ 草案 | v3.1 sprint 3g 启动前锁 |
 | jhyy lang-spec | § 19(待增)| `unsafe cap { ... }` block 语法 + WaiverCap 语义 | ⏳ 草案 | sprint 3g 启动前锁(D15 / D19 闭环)— 进 spec 不放 OS std |
-| jhyy abi | § 12(待增)| Cap wire format + cnode 布局 + **多 target ABI 表 + freestanding ABI 约定** + **cap-offset 表 wire 形式 `{msg_tag: u32, n_caps: u16, cap_offsets: [u16; n]}`** | ⏳ 草案 | v2.0 milestone 启动前锁(由 compiler D5 + v2.0.0-os-prep § 5.1 #5 触发);cap-offset 部分 **2026-08-05 D16 锁** |
+| jhyy abi | § 13(待增,§ 12 = 版本历史 v1.0.0 锁定)| Cap wire format + cnode 布局 + **多 target ABI 表 + freestanding ABI 约定** + **cap-offset 表 wire 形式 `{msg_tag: u32, n_caps: u16, cap_offsets: [u16; n]}`** + Debug ABI 镜像 | ⏳ 草案 | v2.0 milestone 启动前锁(由 compiler D5 + v2.0.0-os-prep § 5.1 #5 触发);cap-offset 部分 **2026-08-05 D16 锁** |
 | jhyy lang-spec | § 20(待增)| ~~Type-driven IPC handler 签名验证~~ | ✅ **2026-08-05 D13 / D20 闭环** | **不进 spec**,MVP 用 `#[ipc_handler]` attribute |
 | jhyy lang-spec | § 21(待增)| Compile-time provenance 接口(`Cap::provenance() -> DebugInfo`) | ⏳ 草案 | sprint 3g 启动前锁(D14 / D21 闭环)— OS 独有,不进 std |
 
