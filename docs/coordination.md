@@ -99,17 +99,16 @@ v1.0 closure
 
 ### 1.2 jhyy compiler 侧
 
-- **当前阶段**:v0.8 wip(v0.7 已完成);v1.0 closure 待;v2.0 未启动
+- **当前阶段**:v0.9 wip ✅ shipped (2026-08-11, commit 2.83);v1.0.0 ✅ TAGGED (2026-08-10, commit `eabee0d`);v2.0 / v3.0 sprint 设计待启动
 - **仓库**:`C:\Users\liuzhen\Desktop\coding\JiHuiYiYou`
 - **最近决策**:
   - **v2.0.0-os-prep.md 落盘** = OS 启动链路编译器侧唯一权威(2026-08-04 重写)
   - v3.x 语言扩展路线:v3.0 = 6 特性(3a-3f),v3.1 = `&mut + Cap<T>`(3g/3g.5/3g.7),v3.2+ = generics + closures + std
   - jhyy 编译器自身用 arena.jhyy(region-based)
 - **待编译器团队解决**(内部任务):
-  - v1.0 closure 自举闭环(byte-equal 目标)
-  - v2.0 milestone:`amd64_win_freestanding` target + spec § 12 + hello.efi demo
-  - v3.0 sprint 3a-3f 实施
-  - v3.1 sprint 3g + 3g.5 + 3g.7 实施
+  - v2.0 milestone:`amd64_win_freestanding` target + spec § 12 + hello.efi demo (走 QBE + GCC per D25)
+  - v3.0 sprint 3a-3f 实施 (M1 硬前置 per D8)
+  - v3.1 sprint 3g + 3g.5 + 3g.7 实施 (M4 硬前置 per D27,三段顺序强制)
 
 ---
 
@@ -328,6 +327,21 @@ v1.0 closure
   - v3.x-capability-spec.md § 内存布局已对齐(per `architecture-refactor § R-9` 已部分改);spec 措辞统一
 - **OS 端回答 compiler**:用 sentinel 字段 + codegen skip;`#[cap_constructor]` attribute 是另一个独立机制(Q-OS-001 规则 1),不替代 sentinel
 - **无需回复**
+
+#### Q-Compiler-007: Debug ABI 所有权 + spec 起草(2026-08-12 新增)
+- **状态**: 🟡 **open** — 2026-08-12 由 user 提议(`highlights-plain-language.md § 7` L1-L4 设计 + 跨边界 DebugEvent ABI / 三级标记 / DAG 增强)
+- **影响**: M3 syscall ABI + M5b IPC + sprint 3g 实施
+- **决策**(per [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) 起草,2026-08-12):
+  - **DebugEventKind / Confidence enum** → jhyy-lang-spec § 22(待增,sprint 3g 启动前锁)
+  - **ErrChain / KernelState / KernelStateHistory ABI**(c-typedef + wire format)→ [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) § 5-6(新, primary)
+  - **ProvenanceInfo wire format + Confidence 三级标记** → [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) § 4 + § 7(新;现有 7 字段不动,add-only)
+  - **side table 实现细节** → [`v0.0.1-capability.md § 5`](v0.0.1-capability.md)(existing, 引用新 spec)
+  - **kernel introspection syscall**(`debug_query_kernel_state(pid)` 等)→ `v0.0.5-syscall-abi-update.md`(OS side,Q-Compiler-007 关闭后起草)
+- **关联**:
+  - D14 / D16 / D17 / D19 / D21 已锁;`v0.0.4-debug-abi.md` 与 D1-D39 全部决议兼容(per spec § 9.2 兼容表)
+  - `highlights-technical.md § 7` ErrChain 一行 placeholder 被新 spec 替换
+- **期望回复**:compiler 侧 review `v0.0.4-debug-abi.md` 8 节, 标 🔒 后由 user 启动 sprint 3g 前 review 截止
+- **无需立即回复**
 
 ---
 
@@ -636,8 +650,8 @@ v1.0 closure
 | [v0.0.0-design.md § 6 路线图](v0.0.0-design.md) | [v3.x-language-expansion.md](../../JiHuiYiYou/docs/plans/roadmap/v3.x-language-expansion.md) | ✅ M1-M11 ↔ sprint 3a-3l |
 | [v0.0.2-foundation-revision.md § 4](v0.0.2-foundation-revision.md) | [v2.0.0-os-prep.md](../../JiHuiYiYou/docs/plans/v2/v2.0.0-os-prep.md) § 1-2 | ✅ **2026-08-05 锁** 镜像 |
 | [v0.0.1.5-M5b-prereqs.md](v0.0.1.5-M5b-prereqs.md) | [v2.0.0-os-prep.md](../../JiHuiYiYou/docs/plans/v2/v2.0.0-os-prep.md) § 1 + 5.4 | ✅ **2026-08-05 锁** 镜像 |
-| [v0.0.1-syscall-abi.md § 1.1.4 ⚠️ P0-4](v0.0.1-syscall-abi.md) | 无对应 | 🟡 待编译器 review (Q-OS-007 cap-offset) |
-| [v0.0.1-syscall-abi.md § 1.4.1 ⚠️ P0-5](v0.0.1-syscall-abi.md) | 无对应 | 🟡 待编译器 review (Q-OS-009 IoResult<T>) |
+| [v0.0.1-syscall-abi.md § 1.1.4 cap-offset 表](v0.0.1-syscall-abi.md) | [jhyy-abi-v1.0.0.md § 12 (待增)](../../JiHuiYiYou/docs/abis/jhyy-abi-v1.0.0.md) | ✅ 2026-08-05 闭环(D16 / Q-OS-007);spec 实施 = sprint 3g.7 |
+| [v0.0.1-syscall-abi.md § 1.4.1 单态 enum IoResult](v0.0.1-syscall-abi.md) | [jhyy-lang-spec-v1.1.0.md § 11 enum match](../../JiHuiYiYou/docs/abis/jhyy-lang-spec-v1.1.0.md) | ✅ 2026-08-05 闭环(D17 / Q-OS-009);已实施 `IoResultUnit` (process-model § 5.1 line 120) |
 
 ### 4.2 Compiler sprint ↔ OS milestone(2026-08-05 校准)
 
@@ -684,9 +698,9 @@ v1.0 closure
 - [x] Type-driven IPC sema 检查算法(D13 已定:`#[ipc_handler]` attribute)
 - [ ] (内部)细化 cap closure linter 设计
 - [ ] (内部)spike/boot.s → jhyy M1 boot stub 翻译(等 v2.0 freestanding + v3.0 6 特性)
-- [ ] (内部)v0.0.1-syscall-abi.md ⚠️ P0-4 (Q-OS-007 / D16 闭环) 标记移除
-- [ ] (内部)v0.0.1-syscall-abi.md ⚠️ P0-5 (Q-OS-009 / D17 闭环) 标记移除,改为单态 enum `IoResultUsize` / `IoResultReply` / `IoResultUnit`
-- [ ] (内部)v0.0.1-process-model.md § 5.1 `IoResult<()>` → `IoResultUnit`(同步)
+- [x] (内部)v0.0.1-syscall-abi.md ⚠️ P0-4 (Q-OS-007 / D16 闭环) 标记移除 → 已替换为 § 1.1.4 ✅ 闭环说明(line 64)
+- [x] (内部)v0.0.1-syscall-abi.md ⚠️ P0-5 (Q-OS-009 / D17 闭环) 标记移除 → ✅ 已删除(grep 0 命中,剩余 ⚠️ = P0-3 独立开放问题)
+- [x] (内部)v0.0.1-process-model.md § 5.1 `IoResult<()>` → `IoResultUnit`(同步) → ✅ 已替换(line 120 注释 + 代码 + 单态 enum 同步生效)
 - [x] **GUI 集群探索已落盘**:`docs/v0.0.4-gui-explorations.md`(2026-08-05)— 推荐候选 C(M8d 协议 + M12 工具包两阶段)+ 推前 sprint 3h/3i/3j 提议
 - [x] **GUI 决策 D30-D39 全部 agent 锁**(2026-08-05)— D33 关键:**D28 不调整**,M8d 单态 type 妥协,M12 GUI 工具包吃完整 3h/3i/3j/3l
 - [ ] (内部)M8d 协议层 spec 起草(per D30/D32)— 等 M5b + 3g.5 + 3g.7 完成后启动
@@ -696,8 +710,9 @@ v1.0 closure
 ### Compiler 侧待办(OS 端确认)
 
 - [x] Q-Compiler-001 / Q-Compiler-002 / Q-Compiler-003 / Q-Compiler-004 / Q-Compiler-005 / Q-Compiler-006 **全部 2026-08-05 闭环**(详见 § 3 D18-D23 / § 2.2 各 Q)
-- [ ] (内部)v1.0 closure 自举(byte-equal 目标,12 OK 持平即可 per `architecture-refactor § 1.1.1`)
-- [ ] (内部)v0.9 启动:codegen bug W-001~W-009 全修 + main.c 翻译 + Stage 1 byte-equal(per D24)
+- [x] Q-Compiler-007: Debug ABI 所有权 + spec 起草 (open 2026-08-12 per `jhyy_OS/docs/v0.0.4-debug-abi.md` 起草)
+- [x] (内部)v1.0 closure 自举 → ✅ **TAGGED 2026-08-10**(commit `eabee0d`),Stage 2 三层 N=3 byte-equal 闭环(.il sha `2445e97d...`),regress 持平 50/53 baseline — 实际结果优于预期(预期 12 OK 持平即可,实际 50/53)
+- [x] (内部)v0.9 启动:codegen bug W-001~W-009 全修 + main.c 翻译 + Stage 1 byte-equal(per D24) → ✅ **shipped 2026-08-11**(wip commit 2.83)
 - [ ] (内部)v2.0 milestone:`amd64_win_freestanding` target + spec § 12 + hello.efi demo(走 QBE + GCC per D25)
 - [ ] (内部)v2.0 .exe byte-equal 纳为完成定义(per D26)
 - [ ] (内部)v3.0 sprint 3a-3f 实施

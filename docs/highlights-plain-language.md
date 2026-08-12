@@ -89,9 +89,9 @@ jhyy 编译器 编 jhyy_OS 内核  →  jhyy_OS 内核 跑 jhyy 编译器
 
 调试 4 层:
 - **L1 编译期 bug 消除**:大部分 bug 在编译期就拒了(类型驱动 IPC、capability provenance)
-- **L2 类型化错误链**:错误信息走类型化 chain(`Err { code, prev, trace }`),LLM agent 能顺着找根因
-- **L3 类型化内核状态**:内核状态是 enum + history,debug build 携带状态变迁
-- **L4 Capability 查询 API**:`Cap::provenance()` 直接看 cap 的来龙去脉(类似 git blame for caps)
+- **L2 类型化错误链**:错误信息走类型化 chain(`Err { code, prev, trace }`),LLM agent 能顺着找根因 → 详见 [`v0.0.4-debug-abi.md § 5`](v0.0.4-debug-abi.md)(Draft, Q-Compiler-007 open)
+- **L3 类型化内核状态**:内核状态是 enum + history,debug build 携带状态变迁 → 详见 [`v0.0.4-debug-abi.md § 6`](v0.0.4-debug-abi.md)(KernelState enum + KernelStateHistory ring buffer N=256)
+- **L4 Capability 查询 API**:`Cap::provenance()` 直接看 cap 的来龙去脉(类似 git blame for caps) → wire format / Confidence 三级标记 / DAG 增强 见 [`v0.0.4-debug-abi.md § 4 + § 7`](v0.0.4-debug-abi.md)
 
 效果: **solo developer 能独立 debug kernel,不用 gdb**;LLM agent 拿到状态直接诊断;**stretch goal:在 jhyy_OS 上跑 Claude Code**(设计目标,不一定实现)。
 
@@ -111,9 +111,9 @@ jhyy 编译器 编 jhyy_OS 内核  →  jhyy_OS 内核 跑 jhyy 编译器
 诚实回答: **这是长期项目**。
 
 理由:
-1. jhyy 编译器还在早期(2026 年 8 月, v1.0 自举闭环预期 = "12 OK 持平即可",不是 47/47 全过;见 `docs/v0.0.2-foundation-revision.md` § 8 + memory `bootstrap_closure_state`)
+1. jhyy 编译器 v1.0.0 已 TAGGED (2026-08-10, commit `eabee0d`) — Stage 2 三层 N=3 byte-equal 闭环达成 (.il sha `2445e97d...`), regress baseline 50/53 PASS (0 failed, 3 skipped)。OS 必需特性 v3.x P0 (3a-3f) 待 sprint 3g 启动。
 2. jhyy_OS 还没写一行代码
-3. 中间需要先让 jhyy 编译器能编自己(v1.0 自举), 然后加 OS 必需的特性(v3.x P0), 然后才能写 OS
+3. 中间需要先让 jhyy 编译器能编自己(v1.0 自举 ✅), 然后加 OS 必需的特性(v3.x P0), 然后才能写 OS
 
 如果做不完, 中间产物还是有价值:
 - jhyy 编译器自举 = 语言学里程碑
