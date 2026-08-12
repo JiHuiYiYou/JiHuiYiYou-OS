@@ -89,7 +89,7 @@ jhyy 编译器 编 jhyy_OS 内核  →  jhyy_OS 内核 跑 jhyy 编译器
 
 调试 4 层:
 - **L1 编译期 bug 消除**:大部分 bug 在编译期就拒了(类型驱动 IPC、capability provenance)
-- **L2 类型化错误链**:错误信息走类型化 chain(`Err { code, prev, trace }`),LLM agent 能顺着找根因 → 详见 [`v0.0.4-debug-abi.md § 5`](v0.0.4-debug-abi.md)(Draft, Q-Compiler-007 open)
+- **L2 类型化错误链**:错误信息走类型化 chain(`ErrChain { source_loc, prev, trace, context, code }`),LLM agent 能顺着找根因 → 详见 [`v0.0.4-debug-abi.md § 5`](v0.0.4-debug-abi.md)(🔒 Locked 2026-08-12,64B)
 - **L3 类型化内核状态**:内核状态是 enum + history,debug build 携带状态变迁 → 详见 [`v0.0.4-debug-abi.md § 6`](v0.0.4-debug-abi.md)(KernelState enum + KernelStateHistory ring buffer N=256)
 - **L4 Capability 查询 API**:`Cap::provenance()` 直接看 cap 的来龙去脉(类似 git blame for caps) → wire format / Confidence 三级标记 / DAG 增强 见 [`v0.0.4-debug-abi.md § 4 + § 7`](v0.0.4-debug-abi.md)
 

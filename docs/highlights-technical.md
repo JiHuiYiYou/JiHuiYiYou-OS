@@ -65,7 +65,7 @@ solo developer 不依赖 gdb / kdb / printk。debug 是 OS 的语言层 feature�
 | 层 | 机制 | 价值 |
 |---|------|------|
 | L1 编译期 bug 消除 | 类型驱动 IPC + capability provenance + 类型错误链 | bug 类消除在源头 |
-| L2 类型化错误链 | walkable error chain:`Err { code, prev: *Err, trace: [CapId] }` | agent 顺着 chain 找根因 |
+| L2 类型化错误链 | walkable error chain:`ErrChain { source_loc, prev: *ErrChain, trace: [*]CapId, context: [*]ProvenanceInfo, code }` | agent 顺着 chain 找根因 |
 | L3 类型化内核状态 | `KernelState` enum + history(debug build)| debug build 携带状态变迁 |
 | L4 Capability query API | `Cap::provenance()` / `query_caps(pid)` | agent 直接查询 |
 

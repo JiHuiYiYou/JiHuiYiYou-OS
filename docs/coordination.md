@@ -329,25 +329,62 @@ v1.0 closure
 - **无需回复**
 
 #### Q-Compiler-007: Debug ABI 所有权 + spec 起草(2026-08-12 新增)
-- **状态**: 🟡 **open** — 2026-08-12 由 user 提议(`highlights-plain-language.md § 7` L1-L4 设计 + 跨边界 DebugEvent ABI / 三级标记 / DAG 增强)
+- **状态**: ✅ **2026-08-12 闭环**(详见 § 3 D41;字段类型分歧另见 D40)
 - **影响**: M3 syscall ABI + M5b IPC + sprint 3g 实施
-- **决策**(per [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) 起草,2026-08-12):
+- **决策**(per [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md),2026-08-12 起草 + 同日 review 后 🔒 锁):
   - **DebugEventKind / Confidence enum** → jhyy-lang-spec § 22(待增,sprint 3g 启动前锁)
   - **ErrChain / KernelState / KernelStateHistory ABI**(c-typedef + wire format)→ [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) § 5-6(新, primary)
-  - **ProvenanceInfo wire format + Confidence 三级标记** → [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) § 4 + § 7(新;现有 7 字段不动,add-only)
+  - **ProvenanceInfo wire format + Confidence 三级标记** → [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) § 4 + § 7(新;7 字段语义 add-only,类型经 D40 修订)
   - **side table 实现细节** → [`v0.0.1-capability.md § 5`](v0.0.1-capability.md)(existing, 引用新 spec)
-  - **kernel introspection syscall**(`debug_query_kernel_state(pid)` 等)→ `v0.0.5-syscall-abi-update.md`(OS side,Q-Compiler-007 关闭后起草)
+  - **kernel introspection syscall**(`debug_query_kernel_state(pid)` 等)→ `v0.0.5-syscall-abi-update.md`(OS side,本 Q 已闭环 → **可启动起草**)
+- **compiler 侧 review 结论**(2026-08-12,逐节过 § 2-§ 8;§ 3 / § 4 / § 6 / § 8 无异议):
+  - **R1(blocking,已修)** § 2.2 DebugEvent header 尺寸三个数互相打架:字段尺寸和 = 54、偏移表实际跨度 = 56(42-43 有 2B 未记账)、按初稿字段序真做自然对齐 = 64(`timestamp_ns: u64 @4` 未 8 对齐)。**决定性约束**:jhyy 无 `packed` / `repr(...)`,且 3a-3n 全部 sprint 均未规划 → 紧凑布局不可表达,wire-format 只能自然对齐。**修法**:按对齐降序重排 → **56B**,无需任何显式内部 padding
+  - **R2(blocking,已修)** § 5.2 ErrChain 同一 bug:声称"三个 u64 全部 8-aligned",但 `prev@28` / `trace_off@40` / `source_loc@4` 均未对齐,按初稿字段序真对齐是 72B。**修法**:同样按对齐降序重排 → 仍是 **64B**(尺寸不变,只改字段序)
+  - **R3(blocking,已修)** § 5.3 jhyy-side 用了 **sprint 3g 时点仍不存在**的语法(判据是 3g 启动那一刻的语言能力,不是今天的 v1.1.0 baseline;3g 之前只 ship v3.0 的 3a-3f,全是 codegen/attribute 层,无一动类型系统):
+    - `Err<T>` 泛型 —— 泛型是 **sprint 3i(v3.2+)**,排在 3g **之后** → 去掉类型参数,与 wire-format 同名 `ErrChain`(`T` 本也未在任何字段使用)。**易误判点**:同期 `Cap<T>` 看似泛型,实为 phantom-type 特例(sema hardcoded + codegen skip `_phantom`,per D12),不走泛型机制,不能据此认为 3g 有泛型
+    - `trace: [CapId]` / `context: [ProvenanceInfo]` —— `[T]` 无尺寸数组类型在 3a-3n **从未规划** → 按 D40 规则改 `[*]CapId` / `[*]ProvenanceInfo`
+    - § 4.5 `pub enum Confidence` —— `pub` / 可见性修饰符**同样从未出现在任何 sprint 规划里** → 去掉 `pub`;若确需跨模块可见性,应另开 Q 走 spec 增补,不在 debug spec 里夹带
+  - **R4(non-blocking,已登记)** ABI § 7.4:struct/enum 不可按值跨 FFI 边界。本 spec 全部 struct 均为内存布局契约(指针传递),不冲突 —— 已在 spec § 9.2 登记,提醒 M3 集成 `SysError.chain` 时以指针传 `ErrChain`
 - **关联**:
   - D14 / D16 / D17 / D19 / D21 已锁;`v0.0.4-debug-abi.md` 与 D1-D39 全部决议兼容(per spec § 9.2 兼容表)
+  - **D40**(字段类型规则,修订 D14 之 `v0.0.1-capability.md § 5.1`)+ **D41**(本 Q 闭环 + spec 锁)
   - `highlights-technical.md § 7` ErrChain 一行 placeholder 被新 spec 替换
-- **期望回复**:compiler 侧 review `v0.0.4-debug-abi.md` 8 节, 标 🔒 后由 user 启动 sprint 3g 前 review 截止
-- **无需立即回复**
+- **OS 端回应 compiler**:R1-R3 全盘接受并已改入 spec;R4 已登记。spec 状态 🟡 Draft → 🔒 Locked
+- **无需回复**
 
 ---
 
 ## § 3 Recent Decisions
 
-> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D11)+ 一句话 + 关联 doc
+> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D41)+ 一句话 + 关联 doc
+
+### 2026-08-12 🔒 D40: wire-format ↔ jhyy-side 表达规则(修订 D14 字段类型部分)
+- **决策**(取代逐字段特判的**可推广规则**):
+  > **wire-format 有显式 `*_len` 字段 → jhyy 侧用 `[*]T` slice;wire-format 是 NULL 结尾单向链 → jhyy 侧用 `*T` 裸指针。**
+- **全 spec 套用**:
+  | 字段 | wire-format | 判定 | jhyy-side |
+  |------|------------|------|-----------|
+  | `ProvenanceInfo.grant_chain` / `revoke_chain` | `uint64_t`,NULL=root,无 len | 链 | `*ProvenanceInfo`(**改**)|
+  | `ErrChain.prev` | `uint64_t`,0=root,无 len | 链 | `*ErrChain`(已正确)|
+  | `ErrChain.trace` | `trace_off` + `trace_len` | 数组 | `[*]CapId`(**改**)|
+  | `ErrChain.context` | `context_off` + `context_len` | 数组 | `[*]ProvenanceInfo`(**改**)|
+- **理由**:
+  - 原状态是 jhyy 侧 slice(16B ptr+len)/ wire-format 单 ptr(8B)**两种视图并存**,序列化有损,且 `len` 语义从未定义 —— 没人填、没人信(初稿自己写的就是"取 slice.data 作为 next 指针")
+  - grant chain 派生自 cnode 树,**本就是 linked list**(per `v0.0.1-capability.md § 5.4` "单向 list" 措辞)
+  - `v0.0.4-debug-abi.md § 7.2` 已承认 list 表达不了 multiparent 分叉 —— 真实结构由新增 DAG `parents[8]`/`children[8]` 承载,slice 语义纯属负担
+- **收益**:`ProvenanceInfo` jhyy 侧与 wire-format 均为 **136B**,两侧视图统一,codegen 直译,无 `len` 同步问题
+- **影响**:改 `v0.0.1-capability.md § 5.1` 字段类型 + `v0.0.4-debug-abi.md § 5.3 / § 7.3 / § 7.5`;**D14 主体决策不变**(见 D14 条目 📜 修订注)
+- **关联**:D14 部分修订;Q-Compiler-007 闭环(D41);`v0.0.4-debug-abi.md § 7.5`;`jhyy-abi-v1.0.0.md § 2.3`(slice = 16B ptr+len)
+
+### 2026-08-12 🔒 D41: Debug ABI spec 锁定 + 所有权(Q-Compiler-007 闭环)
+- **决策**:
+  - [`v0.0.4-debug-abi.md`](v0.0.4-debug-abi.md) 经 compiler 侧逐节 review(§ 2-§ 8)+ R1-R4 修订后 **🟡 Draft → 🔒 Locked**
+  - **所有权**:OS 侧持 spec 起草 + wire format;compiler 侧持 sprint 3g 实施(jhyy-side `DebugEvent` / `Confidence` / `ErrChain` 类型定义 + `DebugEvent::emit()` codegen)
+  - **尺寸定案**:DebugEvent **56B** / ErrChain **64B** / StateTransition 48B / KernelStateHistory 12304B / ProvenanceInfo **136B**(全部 align 8)
+  - **`v0.0.5-syscall-abi-update.md`**(kernel introspection syscall)解除阻塞,OS 侧可启动起草
+- **review 发现(R1-R4)**:详见 § 2.2 Q-Compiler-007 条目。要点:R1/R2 两处 c-typedef 尺寸与自然对齐自相矛盾(54/56/64 与 64/72),根因是 **jhyy 无 `packed`/`repr(...)` 且 3a-3n 全程未规划** → wire-format 只能自然对齐,按对齐降序重排解决;R3 jhyy-side 用了 3g 时点不存在的语法(泛型在 3i,`[T]` 与 `pub` 从未规划);R4 FFI 按值传参限制已登记
+- **方法论(值得沿用)**:跨边界 spec 的语言可行性,判据是**该 spec 实现 sprint 启动那一刻**的语言能力,不是起草当天的 baseline,也不是"迟早会有"。3g 之前只 ship v3.0 的 3a-3f,全是 codegen/attribute 层,不动类型系统
+- **关联**:Q-Compiler-007 闭环;D40(字段类型规则);D14/D16/D17/D19/D21 兼容(per spec § 9.2);sprint 3g 启动前置解除
 
 ### 2026-08-05 🔒 D8: v2.0 milestone 是 M1 启动硬前置(2026-08-05 新增)
 - **决策**:M1 启动的两个并联前置 = v2.0(`amd64_win_freestanding` target + hello.efi demo,走 QBE+GCC,无 libc link)+ v3.0(6 特性 3a-3f)
@@ -401,6 +438,7 @@ v1.0 closure
   - **不进 std lib**(per Q-Compiler-004)
   - spec 增补 lang-spec § 21(待增)— 描述 `Cap::provenance() -> DebugInfo` 接口
 - **关联**:Q-OS-003 闭环;Q-Compiler-004 闭环;v0.0.1-capability.md § 5
+- 📜 **部分修订(2026-08-12,D40)**:`v0.0.1-capability.md § 5.1` 的 `grant_chain` / `revoke_chain` 字段类型由 `[*]ProvenanceInfo` slice 改为 `*ProvenanceInfo` 裸指针。**D14 主体决策(OS 独有 / 不进 std / debug build side table / `Cap::provenance()` 接口)不变**,本条仍有效。
 
 ### 2026-08-05 🔒 D15: `unsafe_cap` 块语法 = `unsafe cap { ... }`,进 spec § 19(Q-OS-004 闭环)
 - **决策**:
@@ -710,7 +748,7 @@ v1.0 closure
 ### Compiler 侧待办(OS 端确认)
 
 - [x] Q-Compiler-001 / Q-Compiler-002 / Q-Compiler-003 / Q-Compiler-004 / Q-Compiler-005 / Q-Compiler-006 **全部 2026-08-05 闭环**(详见 § 3 D18-D23 / § 2.2 各 Q)
-- [x] Q-Compiler-007: Debug ABI 所有权 + spec 起草 (open 2026-08-12 per `jhyy_OS/docs/v0.0.4-debug-abi.md` 起草)
+- [x] Q-Compiler-007: Debug ABI 所有权 + spec 起草 → ✅ **2026-08-12 闭环**(详见 § 3 D41;字段类型分歧走 D40)。`v0.0.4-debug-abi.md` 🔒 Locked,sprint 3g 启动前置解除
 - [x] (内部)v1.0 closure 自举 → ✅ **TAGGED 2026-08-10**(commit `eabee0d`),Stage 2 三层 N=3 byte-equal 闭环(.il sha `2445e97d...`),regress 持平 50/53 baseline — 实际结果优于预期(预期 12 OK 持平即可,实际 50/53)
 - [x] (内部)v0.9 启动:codegen bug W-001~W-009 全修 + main.c 翻译 + Stage 1 byte-equal(per D24) → ✅ **shipped 2026-08-11**(wip commit 2.83)
 - [ ] (内部)v2.0 milestone:`amd64_win_freestanding` target + spec § 12 + hello.efi demo(走 QBE + GCC per D25)
@@ -722,7 +760,9 @@ v1.0 closure
 ### 双边决策 / Cross-Boundary Decisions(2026-08-05 锁,user 让双边自己当)
 
 - [x] D8 / D9 / D10 / D11 / D12-D17 / D18-D23 / D24-D29 / **D30-D39 GUI 决策** — **全部 32 个新决策 2026-08-05 锁**
+- [x] **D40 / D41**(Debug ABI)— **2026-08-12 锁**;累计 41 个决策
 - [x] Q-OS-005 / Q-OS-006 / Q-OS-008 / Q-Compiler-001~006 / Q-OS-001~004 / Q-OS-007 / Q-OS-009 — **全部 12 个 Q 2026-08-05 闭环**
+- [x] **Q-Compiler-007 — 2026-08-12 闭环**;累计 13 个 Q 全闭环,当前**无 open 跨边界问题**
 
 ---
 
@@ -786,6 +826,18 @@ v1.0 closure
   - **OS 团队不靠推前 compiler sprint 来解锁 GUI** — 这正合"双线作战"原则
 - 影响:coordination.md § 3 现在有 39 个决策(D1-D39);§ 1.1 status 加 GUI 决策行;`v0.0.4-gui-explorations.md` § 10/11/12 全部改为"agent 锁"措辞
 - GUI doc § 11 开放边界从 10 项降到 5 项(5 项已锁,5 项是 M8d/M12 实施时自然面对的,不需要 user 介入)
+
+### 2026-08-12 — Debug ABI review + 锁定(D40 / D41,Q-Compiler-007 闭环)
+- 触发:`v0.0.4-debug-abi.md` 2026-08-12 起草为 🟡 Draft,自身 § 7.5 挂了一条"**待 D14 修订提案时决定**"(jhyy 侧 slice vs wire-format 单 ptr 两种视图);同时 § 9.3 把"Q-Compiler-007 关闭 + 本 spec 锁"列为 sprint 3g 启动硬前置 → 两项不办,3g 起不来
+- compiler 侧逐节 review § 2-§ 8,4 条发现(§ 3 / § 4 / § 6 / § 8 无异议):
+  - **R1** § 2.2 DebugEvent header 三个尺寸互斥(字段和 54 / 偏移表跨度 56 / 真自然对齐 64)→ 按对齐降序重排,**56B**
+  - **R2** § 5.2 ErrChain 同一 bug(声称 8-aligned 实则 `prev@28` 等未对齐,真对齐 72B)→ 重排后仍 **64B**
+  - **R3** § 5.3 jhyy-side 用了 sprint 3g 时点不存在的语法:`Err<T>` 泛型(在 3i / v3.2+,晚于 3g)、`[T]` 无尺寸数组(3a-3n 从未规划)、`pub`(同样从未规划)→ 分别改 `ErrChain` 去泛型 / `[*]T` 切片 / 去 `pub`
+  - **R4** ABI § 7.4 struct 不可按值跨 FFI —— 本 spec 均为指针传递,不冲突,已登记提醒 M3
+- **根因归纳**:R1/R2 同源 —— **jhyy 无 `packed` / `repr(...)` 且 3a-3n 全程未规划**,紧凑布局在 jhyy 侧不可表达,故所有 wire-format 只能自然对齐 + 显式 `_pad` 字段。已升格为 spec § 2.5 总原则
+- **方法论修正**:跨边界 spec 的语言可行性,判据是**该 spec 实现 sprint 启动那一刻**的语言能力(本例 = 3g,其前只有 v3.0 的 3a-3f,全是 codegen/attribute 层),既不是起草当天的 v1.1.0 baseline,也不是"3i 迟早会有泛型"
+- 新加 2 条决策:**D40** wire-format ↔ jhyy-side 表达规则(修订 D14 字段类型部分,`ProvenanceInfo` 两侧统一到 136B)/ **D41** spec 🔒 锁定 + 所有权(Q-Compiler-007 闭环)
+- 影响:§ 3 现有 41 个决策(D1-D41);13 个 Q 全闭环,**当前无 open 跨边界问题**;`v0.0.5-syscall-abi-update.md` 解除阻塞;sprint 3g 启动前置解除
 
 ### 2026-08-05 — 文档大校准(第一轮,上午)
 - 触发:读 `v2.0.0-os-prep.md`(OS 侧之前漏读)
