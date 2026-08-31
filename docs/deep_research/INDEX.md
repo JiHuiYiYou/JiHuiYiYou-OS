@@ -1,16 +1,17 @@
 # docs/deep_research/ — 研究索引
 
-> 7 份深度研究的角色分类 + 实现参考标注 + 时间线锚点。
+> 8 份深度研究的角色分类 + 实现参考标注 + 时间线锚点。
 > 不重复原文结论；不修改 v0.0.0-v0.0.4 doc；只登记引用方向。
 
 ## 0. 元约定
 
-### 角色 4 类
+### 角色 5 类
 
 - **机制设计**：提出具体技术方案（代码路径 / 数据结构 / 接口 / 数据流）。
 - **机制审查**：第三方审计 / 可证伪假设 / 外部基线对比 —— **不构成设计结论**。
 - **排期修订**：调整 milestone 依赖关系 / 时间线 / 实施切片。
 - **执行摘要**：依附同源研究的决策切片；自身不构成独立 design。
+- **协议规范**：基于机制设计的研究,落盘为可机器检查的 spec 草案;含决策清单、IDL / 状态机 / 错误模型。
 
 ### 实现参考维度
 
@@ -45,6 +46,7 @@
 | 5 | [jhyy_gui_subsystem.md](jhyy_gui_subsystem.md) | 机制设计 | 概念完整 | 2026-08-26 | 28731 | `v0.0.1-capability.md`、`v0.0.1-syscall-abi.md`、`v0.0.4-gui-explorations.md` | 成熟草案 |
 | 6 | [result.md](result.md) | 机制设计 | 方法论强 + 论证密度高 | 2026-08-26 | 33679 | `v0.0.1-capability.md` §1;`v3.x-capability-spec.md` §8 | 成熟草案 |
 | 7 | [jhyy_OS有效性评估与架构分析.md](jhyy_OS有效性评估与架构分析.md) | **机制审查** | (审计,非设计) | 2026-08-28 | 19050 | `v0.0.0-design.md`、`jhyy_gui_subsystem.md`(被审)、`result.md` | 成熟草案 |
+| 8 | [报告§11§12决策与拍板流程说明.markdown](报告§11§12决策与拍板流程说明.markdown) | 协议规范初稿 | 决策完整 + IDL / 状态机 / 错误码 | 2026-08-27 | 32228 | `jhyy_gui_subsystem.md` §11/§12;`v3.x-capability-spec.md` §4.1;`coordination.md` D-GUI 系列 | 评审中 |
 
 字符数按 `wc -m`（含空格与中文标点）；创建日按文件系统 mtime。
 
@@ -61,7 +63,7 @@
 - **本文引用了**：`jhyy_gui_subsystem.md` §9、§12
 - **本文建议修订 ⇒**：`coordination.md` §0 Critical Path（M5b → M8d 链待更新）；`v0.0.4-gui-explorations.md`（M8d 时机）
 - **阻塞项**：末尾 4 个 `[ ]` 复选框未勾选 —— 本文不替作者决定
-- **已知悬而未决**：4 项均标「作者拍板」(per 原文 § 五)
+- **已知悬而未决**：4 项均未勾选(per 原文 § 五)
 
 ### §2.2 jhyy_v20_研究_执行摘要.md
 
@@ -179,6 +181,23 @@
   - 在进入 M1 前应完成的 8 项最低验证门（per § 8.5）
   - 3 个最小可行实验（capability 派生链 / surface 生命周期 / Agent Debug 对照）未启动
 
+### §2.8 报告§11§12决策与拍板流程说明.markdown
+
+- **路径**：`docs/deep_research/报告§11§12决策与拍板流程说明.markdown`
+- **元信息**：创建日 2026-08-27 / 字符数 32228 / 状态：评审中
+- **角色**：**协议规范初稿**(本类共 1 份)
+- **实现参考维度**：决策完整(D-GUI-1 ~ D-GUI-10 决策清单 + ratification gate);协议细节含 topology / wire format / IDL / lifecycle invariants L1-L4 / Shm region ↔ mapping split / 异步 revoke 4 阶段 / seat 策略 / error model / M8d scope & sequencing / acceptance matrix
+- **核心论点摘要**：jhyy GUI protocol spec 初稿。capability boundary axiom + 5 类 cap 类型 + linear handle + 8 字节 cnode ref + byte-equal axiom + append-only 版本 + L1-L4 lifecycle invariants + 单 seat 焦点链 epoch 验证 + 8 维验收矩阵
+- **本文引用了**：`jhyy_gui_subsystem.md` §11/§12;`v3.x-capability-spec.md` §4.1;`coordination.md` D16
+- **本文建议修订 ⇒**：`v3.x-capability-spec.md` §4.1-§4.3 加 `Cap<Shm>` 例外条款;`coordination.md` 加 D-GUI 系列条目;`jhyy-abi-v1.0.0.md` §13 按本协议扩充 cap 类型清单
+- **阻塞项**：
+  - D-GUI-8/9/10 + §4.2/§7.2/§8 → 🔒 (2026-09-01,见原 doc §13 revision history)
+  - 当前 draft 形式存在 `docs/deep_research/`,未独立为 `docs/design/gui_protocol.md`
+- **已知悬而未决**：
+  - wire representation(8 字节 layout + rights encoding + epoch presence 是否进 cap);sprint 3i 落地
+  - grace period 默认值;MAX_RECTS;Bytes\<N\> 表示;fourcc registry(均 🔧 IMPLEMENTATION-DEFINED)
+  - buffer / GPU domain revoke 强制顺序(per § 6.4 注)
+
 ---
 
 ## 3. 角色分布概览
@@ -209,6 +228,12 @@
 | 文件 | 依附 | 切片用途 |
 |---|---|---|
 | `jhyy_v20_研究_执行摘要.md` | 多目标构建研究 | 9 项修订 + R1-R10 风险排序；sprint kickoff 时优先查阅 |
+
+### 协议规范初稿（1）
+
+| 文件 | 实现参考维度 | 主要交付物 |
+|---|---|---|
+| `报告§11§12决策与拍板流程说明.markdown` | 决策完整 + IDL / 状态机 / 错误码 | D-GUI-1 ~ D-GUI-10 决策清单 / topology / wire format / IDL / L1-L4 lifecycle invariants / Shm region ↔ mapping split / revoke 4 阶段 / seat 策略 / error model / acceptance matrix |
 
 ---
 
@@ -250,18 +275,18 @@
 | GUI 阻塞项 | **4 个**（Cap<Shm> / epoch revoke / D16 / VSync）| `M8d_M12_排期修订.md` § 一 |
 | result.md 三段 sprint | **顺序强制**（3g → 3g.5 → 3g.7）| `result.md` § 10 |
 
-**待 user 拍板**：是否把这些工作量显式分阶段裁剪（per § 7 局限，本 INDEX 不仲裁）。
+**未决议**：是否把这些工作量显式分阶段裁剪（per § 7 局限，本 INDEX 不仲裁）。
 
-### §4.4 待 user 拍板的排期调整
+### §4.4 未决议的排期调整
 
 来源：`M8d_M12_排期修订.md` § 五末尾 4 个 `[ ]` 复选框
 
-- [ ] 作者拍板：采纳方案 c（线性句柄 + 内核共享映射）
-- [ ] 作者拍板：`unsafe_share` 限定为 RW↔RO/W 审计机制
+- [ ] 采纳方案 c（线性句柄 + 内核共享映射）
+- [ ] `unsafe_share` 限定为 RW↔RO/W 审计机制
 - [ ] v3.x spec 纳入 `Cap<Shm>`、SharedCap 取舍、epoch/ack revoke
 - [ ] `coordination.md` 更新 M8d / M12 前置依赖与排期
 
-INDEX 不替作者勾选。
+INDEX 仅登记。
 
 ---
 
@@ -285,6 +310,7 @@ INDEX 不替作者勾选。
 | 设计可证伪假设 / 验证矩阵 | `jhyy_OS有效性评估与架构分析.md` | §8 H1-H8 / §8.5 最低验证门 |
 | 找 9 项修订 diff（sprint kickoff） | `jhyy_v20_研究_执行摘要.md` | §9 项文档修订 |
 | 排期调整 M8d / M12 | `M8d_M12_排期修订.md` | 整文（2 KB） |
+| 起草 GUI 协议规范 / IDL / 决策清单 | `报告§11§12决策与拍板流程说明.markdown` | §0 preamble / §1 topology / §2 cap contracts / §3 wire format / §4 IDL / §5 kernel boundary / §6 revoke / §7 seat / §8 error model / §9 M8d scope / §10 acceptance matrix |
 
 ---
 
@@ -292,7 +318,7 @@ INDEX 不替作者勾选。
 
 | 自检项 | 判定标准 | 检查方式 |
 |---|---|---|
-| 索引完整性 | 7 份全有登记 | §2.x 子节数 = 7 |
+| 索引完整性 | 8 份全有登记 | §2.x 子节数 = 8 |
 | 角色分类 | 每份至少一条引用方向 | §2.x 「本文引用了」/「本文建议修订」非空 |
 | 实现参考标注 | 每份机制设计有 1-2 个维度标签 | §2.x 「实现参考维度」非空 |
 | 时间线锚点具体化 | §4 列 M8d/M12 + 2 周估算 + 4 阻塞并行 | grep `M8d / M12 / 2 周 / 4 阻塞` 关键词 |
@@ -305,12 +331,12 @@ INDEX 不替作者勾选。
 
 ## 7. INDEX 的局限
 
-1. **不解决时间线张力** —— §4 仅列锚点，排期调整由 user 拍板。
-2. **不锁定任何设计结论** —— 7 份原文 status 标「成熟草案」，INDEX 不背书。
+1. **不解决时间线张力** —— §4 仅列锚点,排期调整未决。
+2. **不锁定任何设计结论** —— 8 份原文 status 标「成熟草案」/「评审中」。
 3. **不取代 coordination.md** —— 引用入口在 coordination.md § 4.3，本 INDEX 是其详细化。
 4. **不取代 design-log.md** —— 设计决策记录仍归后者。
-5. **不为 `result.md` 与 `有效性评估` 之间的分歧背书** —— §2 标注各自角色（机制设计 vs 机制审查）。
-6. **不保证 7 份原文自身不冲突** —— 仅登记，不仲裁。
+5. **不为 `result.md` 与 `有效性评估` 之间的分歧裁定** —— §2 标注各自角色（机制设计 vs 机制审查）。
+6. **不保证 8 份原文自身不冲突** —— 仅登记，不仲裁。
 7. **不自动跟踪更新** —— mtime / 字符数需手动更新（per CLAUDE.md 原则 1 反对增加工具链负担）。
 8. **不解决「角色分类本身的争议」** —— 4 类由 user 在 2026-08-31 会话中确认。
 9. **不替作者勾选 4 个 `[ ]` 复选框**（per §4.4）。
