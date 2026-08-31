@@ -356,7 +356,41 @@ v1.0 closure
 
 ## § 3 Recent Decisions
 
-> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D41)+ 一句话 + 关联 doc
+> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D41 / D-GUI-1 ~ D-GUI-10)+ 一句话 + 关联 doc
+
+### 2026-09-01 🔒 D-GUI-1 ~ D-GUI-10: GUI 协议 spec 决策清单(OS GUI 子系统)
+
+**协议 spec**:`docs/deep_research/报告§11§12决策与拍板流程说明.markdown`(角色:协议规范初稿);**OS 关联**:M8d(compositor,3g/3i/3j 后启动)+ M12(GUI 工具包安全 API 稳定集)。
+
+- **D-GUI-1 共享内存 = 线性句柄 + 内核共享映射(方案 c)**:`Cap<Shm>` 实例线性(move-only,不可 Clone);共享的是 Region 的 page set,通过 kernel mapping ledger(`(Region, AS, range, rights, epoch)` 元数据)**记录映射**,ledger 是元数据不是 GC(per `jhyy_gui_subsystem.md § 3` + `result.md` byte-equal axiom)
+- **D-GUI-2 `unsafe_share` = `RW↔RO/W` 审计机制**:**默认路径 = `RW → RO` 派生**(无需 unsafe_share);`unsafe_share` 仅用于跨域写共享(compositor 给 GPU 域写扫描缓冲),必须 `unsafe_cap` 标注 + 编译期 audit record `(region_id, source_domain, target_domain, granted_rights, epoch)` + 封送 payload 必须带 region_id/rights/epoch 三元组(per `jhyy_gui_subsystem.md § 3` + `v0.0.4 § 2.4`)
+- **D-GUI-3 合成器 = 独立用户态服务;无内核内合成**:`Cap<Compositor>` 由 init 颁发给 client;`Cap<Seat>` 仅由 trusted compositor 持有(single-owner);compositor 聚合 `Cap<Framebuffer>` / `Cap<Gpu>` / `Cap<Seat>` / `Cap<Shm>`,但**保留审计边界**(`Cap<Seat, Focus>` 不能派生为 `Cap<Shm, ReadAll>`)
+- **D-GUI-4 M8d = 3g/3i/3j 之后启动;M12 重定义**:M8d 编译器侧硬前置 = 3g + 3g.5 + 3g.7 + 3i + 3j;M12 从「工具包功能集」→「权限/生命周期/确定性三不变式可机器检查的稳定 API」(per `M8d_M12_排期修订.md` § 1 + § 4)
+- **D-GUI-5 消息不含物理地址 / FD / CSpace / GPU resource id**:所有跨域对象经 `Cap<T>` + D16 offset 引用;**Axiom C1**(per `v0.0.1-capability.md § 1` + D16 闭环)
+- **D-GUI-6 `Cap<Shm>` RO/RW 派生 + mapping ledger 位置(3i)**:**语义锁**,wire representation TBD(8 字节 layout + rights encoding + epoch 是否进 cap 由 sprint 3i 定)
+- **D-GUI-7 异步 revoke = epoch + ack + bounded grace period(3j)**:**语义锁**,timeout 默认值 TBD;4 阶段:Logical invalidation → Mapping protection(shootdown/IPI)→ Explicit confirmation(`AckRevoke(epoch)`)→ Resource release
+- **D-GUI-8 协议版本 = append-only**:`GUI_PROTOCOL_VERSION = 0`;新增 interface / request / event / cap parameter 仅追加到现有 list 末尾;**breaking change**(删 request / 改 cap move 语义 / 重排 cap-offset 字段)需升 `GUI_PROTOCOL_VERSION := 1`(在连接建立时协商)
+- **D-GUI-9 `commit_seq` 严格单调,禁回绕**:L1 不变式;**wrap-around 禁止** — 2^64 周期足够,真实收益是简化比较器逻辑(单 `b > a` 即可,无需两阶段);64-bit 耗尽时 surface 必须 destroy + recreate
+- **D-GUI-10 M8d v0 功能集 = 单 output + 软件合成 + 仅 pointer**:`Compositor` / `Surface` / `Buffer` / `Seat` 4 个 interface;**单 output** + **软件 compositor**(linear scan + dirty rectangles, ARGB8888);**仅 pointer input**(单 seat,keyboard repeat / touch 推迟);**`FrameCallback`** 由 VSync 驱动。**v0 显式排除**:XDG shell 完整 / multi-seat / drag-and-drop / data device / screen capture / HDR / GPU 合成 / full tablet support(per `v0.0.4 § 6 D34` + `jhyy_gui_subsystem.md § 9`)
+
+**L1–L4 生命周期不变式**(per D-GUI-9 衍生,已 lock):
+- **L1 commit_seq 单调**:重复或乱序值 = `ESEQ_COMMIT`;wrap-around forbidden
+- **L2 排他写窗口**:`AttachBuffer` 至对应 `BufferReleased` 期间 client 不得写 buffer;compositor/scanout 独占读;toolkit type-state 本地强制 + compositor 按 buffer 强制 + kernel mapping rights 最终防线
+- **L3 release 前不可复用**:client 收到 `BufferReleased` 后方可恢复写
+- **L4 destroy 级联**:`Surface.Destroy` 或 client cap 被 revoke → surface 进 `Dying`,所有未确认 buffer 进 revoke(§ 6)
+
+**Seat focus-epoch 验证**(per D-GUI-9 family,已 lock):`focus_epoch` 改变使所有 pending event 失效;事件投递前**重新验证** `focus == target && epoch still valid`(Nitpicker 模式)。
+
+**8 类 GuiError 错误码**:`EPERM_RIGHTS` / `ESEQ_COMMIT` / `EEPOCH_REVOKE` / `EBAD_CAPOFF` / `EBUSY_SCANOUT` / `ENOMEM_LAYOUT` / `ETIMEOUT_REVOKE`;kernel error → `GuiError { tag, code, cap_id?, epoch? }`,**禁止暴露**物理地址 / 页表 / CSpace / driver 内部结构。
+
+**🔧 IMPLEMENTATION-DEFINED(待 3i / 3j / M8d 落地)**:`MAX_RECTS`(256 倾向)/ `Bytes<N>` 表示(N=64 倾向)/ fourcc registry / grace period 默认值(10ms 倾向)/ `Cap<Shm>` wire 8 字节 layout + rights 编码 + epoch 是否进 cap。
+
+**关联**:
+- `docs/deep_research/INDEX.md` §2.8(本决策完整登记)
+- `docs/v0.0.2-foundation-revision.md` §4(M8d + M12 行 + 依赖链图)
+- `docs/v0.0.4-gui-explorations.md` §3.3(候选 C 锁 + GUI 决策清单 5 行)
+- `v3.x-capability-spec.md` 待增 `Cap<Shm>` 例外条款(本 sprint 同步)
+- `jhyy-abi-v1.0.0.md § 13` 待增 cap 类型清单 + append-only 版本(本 sprint 同步)
 
 ### 2026-08-12 🔒 D40: wire-format ↔ jhyy-side 表达规则(修订 D14 字段类型部分)
 - **决策**(取代逐字段特判的**可推广规则**):
