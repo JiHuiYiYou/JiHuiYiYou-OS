@@ -713,6 +713,31 @@ v1.0 closure
 
 详见 [v0.0.2-foundation-revision.md § 4](v0.0.2-foundation-revision.md) + [v0.0.1.5-M5b-prereqs.md](v0.0.1.5-M5b-prereqs.md)
 
+### 4.3 deep_research 引用入口
+
+7 份深度研究文档(2026-08-26 ~ 08-28 创建)登记见 [`docs/deep_research/INDEX.md`](deep_research/INDEX.md)。
+
+**角色分布**:机制设计(4) / 机制审查(1) / 排期修订(1) / 执行摘要(1)。
+
+**引用方向**:
+
+| deep_research 文档 | 登记状态 | OS / Compiler doc 引用对象 | 备注 |
+|---|---|---|---|
+| `jhyy_v20_多目标与可重现构建研究.md` | 成熟草案 | `v0.0.1-syscall-abi.md`、`v0.0.2-foundation-revision.md`、`jhyy-abi-v1.0.0.md`、`v2.0.0-os-prep.md`(待 user 决定) | 9 项文档修订 diff |
+| `jhyy_v20_研究_执行摘要.md` | 成熟草案(依附) | 同上(执行切片) | sprint kickoff 优先查阅 |
+| `syscallABI边界与寄存器约定研究.md` | 成熟草案 | `v0.0.1-syscall-abi.md`、`v0.0.1-process-model.md`、`v0.0.1-capability.md`、`v0.0.2-foundation-revision.md`、`v0.0.1.5-M5b-prereqs.md`、`v0.0.4-debug-abi.md`、`jhyy-abi-v1.0.0.md` | 22 验收用例 + D-M3-1~6 待升级 |
+| `jhyy_gui_subsystem.md` | 成熟草案 | `v0.0.1-capability.md`、`v0.0.1-syscall-abi.md`、`v0.0.4-gui-explorations.md`、`v3.x-capability-spec.md`(待增) | M8d 后移 / 方案 c |
+| `result.md` | 成熟草案 | `v0.0.1-capability.md`、`v3.x-capability-spec.md`、`v0.0.4-debug-abi.md`、`jhyy-abi-v1.0.0.md`、`v2.x-qbe-rewrite.md` | Cap<T> v3.1 落地 + 三段 sprint |
+| `M8d_M12_排期修订.md` | 成熟草案 | `coordination.md`(本文件 §0 待更新)、`v0.0.4-gui-explorations.md` | 4 阻塞项 + 末尾 4 `[ ]` |
+| `jhyy_OS有效性评估与架构分析.md` | 成熟草案(机制审查) | 审查 `v0.0.0-design.md` / `jhyy_gui_subsystem.md` / `result.md` | 「设计可信、实现待证、领先未证」;8 项可证伪假设 |
+
+**时间线张力**(M8d 后移、2 周 MVS 估算偏激进、H1-H8 待验证)锚点见 INDEX §4;本节不仲裁。
+
+**关联**:
+
+- INDEX § 4.4 末尾 4 个 `[ ]` 复选框未勾选 —— 本文件 § 0 Critical Path 更新待 user 决定
+- INDEX § 7 列出 INDEX 自身 10 条局限 —— 本节引用入口不取代 INDEX 的细节登记
+
 ---
 
 ## § 5 待定 spec 增补
