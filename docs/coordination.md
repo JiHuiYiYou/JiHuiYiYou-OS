@@ -392,6 +392,32 @@ v1.0 closure
 - `v3.x-capability-spec.md` 待增 `Cap<Shm>` 例外条款(本 sprint 同步)
 - `jhyy-abi-v1.0.0.md § 13` 待增 cap 类型清单 + append-only 版本(本 sprint 同步)
 
+### 2026-09-01 🔒 D-GUI-11: M8d ↔ 3i/3j 关系 — OS 需求优先(2026-09-01 重修订)
+
+- **决策**:3i(generics 单态化)+ 3j(closures)从"M11 硬前置"升级为"**M8d + M11 硬前置**";compiler `v3.x-language-expansion.md` § D28 表已同步修订
+- **影响**:M8d compositor 启动前必须完成 3i + 3j(generics 编译期实现 + 闭包结构体展开);M11 启动前仍需完成(编译器自身用 `Vec<T>` / 闭包 visitor)
+- **依赖**:M8d 跟 M11 共享 3i + 3j 完成点;3i 必须在 3j 前;3l.1 ~ 3l.4 仅 M11 必推
+- **不冲突点**:3i + 3j 在 M8d 之前完成不影响 M11 启动时机(M11 还需 3l 全套);3i + 3j 工作量评估见 `v3.x-language-expansion.md` § 3i / § 3j 验收标准
+- **关联**:`docs/v0.0.2-foundation-revision.md` § 4 关键观察(2026-09-01 修订条目);`v3.x-language-expansion.md` § D28 表 + 关键观察 + 3l 拆 4 子项;`v2.0.0-os-prep.md` § 1 M8d 推后说明(M11 硬前置跟 M8d 硬前置并行)
+
+### 2026-09-01 🔒 D-GUI-12: M3 syscall ABI = MS x64 stub + `#[naked]` interrupt(非 `syscall` 指令)
+
+- **决策**:M3 syscall ABI 走 **MS x64 函数指针 / `#[naked]` interrupt entry**,**不**走 Linux 风格 `syscall` 指令;compiler `v2.0.0-os-prep.md` § 1 M3 行 + `v3.x-language-expansion.md` § 3a 验收标准已同步修订
+- **影响**:M3 sprint 用 3a(inline asm)+ 3b(`#[naked]`)即可,不依赖后续任何 syscall 指令支持;UEFI = EFIAPI = MS x64(per `feedback_uefi_x64_conventions`),OS 启动路径走 EFI 函数指针
+- **关联**:`docs/v0.0.2-foundation-revision.md` § 4 M3 行(描述同步);`v2.0.0-os-prep.md` § 3 决策 9 + § 1 M3 行;`v3.x-language-expansion.md` § 3a 验收标准
+
+### 2026-09-01 🔒 D42: 3a inline asm 跟 v2.x 自写后端顺序 fallback 锁定
+
+- **决策**:**3a 启动不依赖 v2.x 完成**;v2.x 完成前 asm 走 QBE 工具链 .s 输出路径(QBE .s 输出文件中直接插入汇编块);v2.x 完成后 asm 走自写后端 "escape hatch" 路径
+- **影响**:3a sprint 启动时可立即推,不等 v2.x(原本写"具体顺序由 user 后续决定"已修订);compiler 3a 验收标准加 fallback 行;`v2.0.0-os-prep.md` § 3 决策 8 同步
+- **关联**:`v3.x-language-expansion.md` § 3a 验收标准;"v2.0 跟 v3.0 6 特性并行"基线(per D8);`v2.0.0-os-prep.md` § 3 决策 8
+
+### 2026-09-01 🔒 D43: byte-equal 验收语义 = 阶段性 self-equal(不跨版本)
+
+- **决策**:byte-equal 是**阶段性 self-equal**,**不**跨版本;v2.0 / v2.x 末 byte-equal = jhyy_N == jhyy_N+1 自洽验证(per D26);v3.0 / v3.1 落地后 .s / .il 因新特性(asm / volatile / link_section / Cap<T> layout)变化,byte-equal 必须**重新 baseline**(jhyy_v3 == jhyy_v4 等)
+- **影响**:compiler 验收标准 § 5.1 #7 + § 5.2 #6/#7 加阶段性注;不再用 v2.0 byte-equal 跨版本要求 v3.0 / v3.1
+- **关联**:`v2.0.0-os-prep.md` § 5.1 #7 + § 5.2 #6/#7;D26(原"byte-equal 三件套")在 v2.x 末仍适用,v3.0+ 重 baseline
+
 ### 2026-08-12 🔒 D40: wire-format ↔ jhyy-side 表达规则(修订 D14 字段类型部分)
 - **决策**(取代逐字段特判的**可推广规则**):
   > **wire-format 有显式 `*_len` 字段 → jhyy 侧用 `[*]T` slice;wire-format 是 NULL 结尾单向链 → jhyy 侧用 `*T` 裸指针。**
