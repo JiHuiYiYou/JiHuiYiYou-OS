@@ -356,7 +356,17 @@ v1.0 closure
 
 ## § 3 Recent Decisions
 
-> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D41 / D-GUI-1 ~ D-GUI-10)+ 一句话 + 关联 doc
+> **新格式**:每条标日期 + 🔒 锁 / 📜 存档 + 决策号(D1-D44 / D-GUI-1 ~ D-GUI-12)+ 一句话 + 关联 doc
+
+### 2026-09-04 🔒 D44: jhyy_OS user-space binary format = `.jhyynb`(自研格式;不抄 ELF/PE/COFF)
+
+- **决策**:jhyy_OS user-space 二进制格式采用 **`.jhyynb`(jhyy native binary)**,自研格式而非 ELF / PE/COFF;`--target=jhyy-os` 是 jhyy 编译器对应 target 名;覆盖 user-space 程序 + M11 时 jhyy 编译器自身 + 完整 DWARF 子集(支持 GDB attach);设计哲学"不将就" — 字段不抄 ELF 历史包袱,但每段对应 jhyy 一个具体语义契约
+- **影响**:① jhyy 编译器需新增 `--target=jhyy-os` emit 路径(不依赖 QBE / gcc 链,自写 .jhyynb emit);② jhyy-OS kernel 需新增 .jhyynb loader(解析 header / section / cap_init / ipc_dispatch / region_table);③ `jhyy-gdbstub` daemon 通过 GDB remote protocol 喂 DWARF 给 GDB
+- **依赖**:v2.0 阶段 ship(v2.0.0 / v2.1.0 / v2.2.0 已 ship; v2.3.0 / v2.4.0 待);v3.0 3a-3f + v3.1 3g + 3g.5 + 3g.7(OS 必备语言特性);M11(自举闭环)
+- **不冲突点**:kernel.efi 仍走 PE/COFF(D1 锁,UEFI 协议层),`.jhyynb` 仅 user-space;jhyy.exe / jhyy.elf(Windows / Linux target)不变,`.jhyynb` 是 jhyy_OS 专属格式
+- **设计文档**:完整 wire-format spec = [`../../JiHuiYiYou/docs/abis/jhyy-binary-format-v1.0.0.md`](../../JiHuiYiYou/docs/abis/jhyy-binary-format-v1.0.0.md)(编译器侧,authoritative);OS 侧镜像 = [`v0.0.5-binary-format.md`](v0.0.5-binary-format.md);plan 文件 = `c-jihuiyiyou-twinkling-frog.md`(Claude plans)
+- **关联**:D1(UEFI + PE/COFF 锁,`.jhyynb` 仅 user-space);D2(region types primary,`.jhyynb` § 9 region_table);D6 + D23(`Cap<T>` 8B + phantom 0-byte,`.jhyynb` § 7 cap_init);D11(`*mut T` vs `&mut` 矩阵,codegen 决定 emit);D13 + D20(`#[ipc_handler]`,`.jhyynb` § 8 ipc_dispatch);D16(cap-offset 表,`.jhyynb` § 8 `CapOffsetTable` 子结构);D17(`IoResult<T>` 单态化,不影响);D22(arena.jhyy 不扩展,`.jhyynb` § 9 region_table 用 cap+offset 自管);D40(wire-format 表达规则,`.jhyynb` 全部链表/数组字段遵守);D41(Debug ABI,`.jhyynb` § 12 debug_group + `.jhyy_cap`);D-GUI-12(MS x64 函数指针 + naked interrupt,`.jhyynb` § 8 IPC dispatch 走函数指针);D42(asm 走 QBE .s,`.jhyynb` § 10 .text 段容许 asm 块);D43(byte-equal 阶段性 self-equal,`.jhyynb` § 4 `version` 字段跨大版本 bump);5 原则(`v0.0.2-foundation-revision.md § 3.1`)
+- **不锁**:实施 sprint 划分 / 工作量估算 / 时间表(per memory `feedback_no_date_estimates`)
 
 ### 2026-09-01 🔒 D-GUI-1 ~ D-GUI-10: GUI 协议 spec 决策清单(OS GUI 子系统)
 
@@ -866,6 +876,18 @@ v1.0 closure
 ## § 8 历史讨论存档
 
 (滚动追加;每条带 timestamp;不删除)
+
+### 2026-09-05 — OS × Compiler 跨项目 doc 对齐 audit(2026-09-05 user 触发)
+- 触发:user "你看看OS的规划和这边有没有对齐,有什么冲突" — 对照 compiler 侧权威 doc(`v2.0.0-os-prep.md` / `v3.x-language-expansion.md` / `jhyy-binary-format-v1.0.0.md` / `v2-v3-parallel-sprint-plan.md`)跟 OS 镜像(`v0.0.5-binary-format.md` / `v0.0.2-foundation-revision.md` / 本 doc)
+- **审计结论**(per `coordination.md § 7` 规则 OS 镜像撤回):
+  - 🔴 **C1 真实数字冲突**:`.jhyynb` Header 字节数 — compiler spec = **112B**(per `jhyy-binary-format-v1.0.0.md § 4`),OS 镜像 `v0.0.5-binary-format.md` = **64B**(早期草案残留)→ **OS 镜像撤回 64B → 112B** + § 1.2 五原则表追更 + § 2.1 step 1 读 header(64B → 112B) + 新增 § 2.4 Header 字段镜像表(loader 视角)
+  - ⚠️ **G1 滞后 gap**(compiler 侧 doc hygiene):`v2.0.0-os-prep.md` § 1 表缺 M8d 行 + D-GUI-11 引用(per 2026-09-01 OS 端已落 D-GUI-11 把 3i+3j 升级为 "M8d + M11 硬前置")
+  - ⚠️ **G2 滞后措辞**(compiler 侧 doc hygiene):`v3.x-language-expansion.md` line 7 跨轴并行措辞仍用 wall-clock framing,2026-09-01 user 决定后未追更
+- **影响**:0 新跨边界问题(G1/G2 单方 doc 追更走 doc hygiene,无需走 Q-OS/Q-Compiler 流程);C1 是 doc 数字撤回,无 spec 改动;13 个 Q 仍全闭环
+- **本 audit 行动项**(commit B OS 侧 + commit A compiler 侧):
+  - Commit B (OS 仓):`v0.0.5-binary-format.md` Header 数字撤回 + § 2.4 字段镜像 + § 6 历史行;本 doc § 8 加本条目
+  - Commit A (compiler 仓):`v2.0.0-os-prep.md` § 1 表加 M8d + § 4.3.5 v3.1 GUI 段 + § 3 决策表加决策 11 + § 5.3 M8d 验收;`v3.x-language-expansion.md` line 7 措辞追更
+- 不阻塞 v3.0 3a-3f 启动时机(仍由 user 决定);不触发新 sprint 设计
 
 ### 2026-08-05 — 12 个 Q + 6 个 user 决定全部闭环(第二轮校准)
 - 触发:user "双边自己当,不要再等了,不知道的缺失的进度或信息全部你自己去探索"
