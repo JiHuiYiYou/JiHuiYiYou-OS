@@ -370,7 +370,7 @@ v1.0 closure
 
 ### 2026-09-01 🔒 D-GUI-1 ~ D-GUI-10: GUI 协议 spec 决策清单(OS GUI 子系统)
 
-**协议 spec**:`docs/deep_research/报告§11§12决策与拍板流程说明.markdown`(角色:协议规范初稿);**OS 关联**:M8d(compositor,3g/3i/3j 后启动)+ M12(GUI 工具包安全 API 稳定集)。
+**协议 spec**:`deep_research/报告§11§12决策与拍板流程说明.md`(角色:协议规范初稿);**OS 关联**:M8d(compositor,3g/3i/3j 后启动)+ M12(GUI 工具包安全 API 稳定集)。
 
 - **D-GUI-1 共享内存 = 线性句柄 + 内核共享映射(方案 c)**:`Cap<Shm>` 实例线性(move-only,不可 Clone);共享的是 Region 的 page set,通过 kernel mapping ledger(`(Region, AS, range, rights, epoch)` 元数据)**记录映射**,ledger 是元数据不是 GC(per `jhyy_gui_subsystem.md § 3` + `result.md` byte-equal axiom)
 - **D-GUI-2 `unsafe_share` = `RW↔RO/W` 审计机制**:**默认路径 = `RW → RO` 派生**(无需 unsafe_share);`unsafe_share` 仅用于跨域写共享(compositor 给 GPU 域写扫描缓冲),必须 `unsafe_cap` 标注 + 编译期 audit record `(region_id, source_domain, target_domain, granted_rights, epoch)` + 封送 payload 必须带 region_id/rights/epoch 三元组(per `jhyy_gui_subsystem.md § 3` + `v0.0.4 § 2.4`)
@@ -396,7 +396,7 @@ v1.0 closure
 **🔧 IMPLEMENTATION-DEFINED(待 3i / 3j / M8d 落地)**:`MAX_RECTS`(256 倾向)/ `Bytes<N>` 表示(N=64 倾向)/ fourcc registry / grace period 默认值(10ms 倾向)/ `Cap<Shm>` wire 8 字节 layout + rights 编码 + epoch 是否进 cap。
 
 **关联**:
-- `docs/deep_research/INDEX.md` §2.8(本决策完整登记)
+- `deep_research/INDEX.md` §2.8(本决策完整登记)
 - `docs/v0.0.2-foundation-revision.md` §4(M8d + M12 行 + 依赖链图)
 - `docs/v0.0.4-gui-explorations.md` §3.3(候选 C 锁 + GUI 决策清单 5 行)
 - `v3.x-capability-spec.md` 待增 `Cap<Shm>` 例外条款(本 sprint 同步)
@@ -785,7 +785,7 @@ v1.0 closure
 
 ### 4.3 deep_research 引用入口
 
-7 份深度研究文档(2026-08-26 ~ 08-28 创建)登记见 [`docs/deep_research/INDEX.md`](deep_research/INDEX.md)。
+7 份深度研究文档(2026-08-26 ~ 08-28 创建)登记见 [`deep_research/INDEX.md`](../deep_research/INDEX.md)。
 
 **角色分布**:机制设计(4) / 机制审查(1) / 排期修订(1) / 执行摘要(1)。
 

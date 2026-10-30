@@ -1,4 +1,4 @@
-# docs/deep_research/ — 研究索引
+# deep_research/ — 研究索引
 
 > 8 份深度研究的角色分类 + 实现参考标注 + 时间线锚点。
 > 不重复原文结论；不修改 v0.0.0-v0.0.4 doc；只登记引用方向。
@@ -46,7 +46,7 @@
 | 5 | [jhyy_gui_subsystem.md](jhyy_gui_subsystem.md) | 机制设计 | 概念完整 | 2026-08-26 | 28731 | `v0.0.1-capability.md`、`v0.0.1-syscall-abi.md`、`v0.0.4-gui-explorations.md` | 成熟草案 |
 | 6 | [result.md](result.md) | 机制设计 | 方法论强 + 论证密度高 | 2026-08-26 | 33679 | `v0.0.1-capability.md` §1;`v3.x-capability-spec.md` §8 | 成熟草案 |
 | 7 | [jhyy_OS有效性评估与架构分析.md](jhyy_OS有效性评估与架构分析.md) | **机制审查** | (审计,非设计) | 2026-08-28 | 19050 | `v0.0.0-design.md`、`jhyy_gui_subsystem.md`(被审)、`result.md` | 成熟草案 |
-| 8 | [报告§11§12决策与拍板流程说明.markdown](报告§11§12决策与拍板流程说明.markdown) | 协议规范初稿 | 决策完整 + IDL / 状态机 / 错误码 | 2026-08-27 | 32228 | `jhyy_gui_subsystem.md` §11/§12;`v3.x-capability-spec.md` §4.1;`coordination.md` D-GUI 系列 | 评审中 |
+| 8 | [报告§11§12决策与拍板流程说明.md](报告§11§12决策与拍板流程说明.md) | 协议规范初稿 | 决策完整 + IDL / 状态机 / 错误码 | 2026-08-27 | 32228 | `jhyy_gui_subsystem.md` §11/§12;`v3.x-capability-spec.md` §4.1;`coordination.md` D-GUI 系列 | 评审中 |
 
 字符数按 `wc -m`（含空格与中文标点）；创建日按文件系统 mtime。
 
@@ -56,7 +56,7 @@
 
 ### §2.1 M8d_M12_排期修订.md
 
-- **路径**：`docs/deep_research/M8d_M12_排期修订.md`
+- **路径**：`deep_research/M8d_M12_排期修订.md`
 - **元信息**：创建日 2026-08-26 / 字符数 1420 / 状态：成熟草案
 - **角色**：排期修订
 - **核心论点摘要**：M8d 必须后移到 sprint 3g / 3i / 3j 后；M12 从「工具包功能集」重定义为「策略合规后的安全 API 稳定集」；4 阻塞项全落在语言/内核层。
@@ -67,7 +67,7 @@
 
 ### §2.2 jhyy_v20_研究_执行摘要.md
 
-- **路径**：`docs/deep_research/jhyy_v20_研究_执行摘要.md`
+- **路径**：`deep_research/jhyy_v20_研究_执行摘要.md`
 - **元信息**：创建日 2026-08-26 / 字符数 4694 / 状态：成熟草案(依附)
 - **角色**：执行摘要
 - **核心论点摘要**：D25/D26 战略方向正确，但 4 处验收措辞与 D25 自相矛盾；9 项文档修订分 3 优先级；R1/R2/R3 是 v2.0 设计评审硬闸门。
@@ -78,7 +78,7 @@
 
 ### §2.3 jhyy_v20_多目标与可重现构建研究.md
 
-- **路径**：`docs/deep_research/jhyy_v20_多目标与可重现构建研究.md`
+- **路径**：`deep_research/jhyy_v20_多目标与可重现构建研究.md`
 - **元信息**：创建日 2026-08-26 / 字符数 34951 / 状态：成熟草案
 - **角色**：机制设计
 - **实现参考维度**：论证密度高 —— 11 类 PE 字段 + byte-equal gate + 9 项修订 diff + R1-R10 风险表 + OVMF/PE-COFF 双跑脚本
@@ -96,7 +96,7 @@
 
 ### §2.4 syscallABI边界与寄存器约定研究.md
 
-- **路径**：`docs/deep_research/syscallABI边界与寄存器约定研究.md`
+- **路径**：`deep_research/syscallABI边界与寄存器约定研究.md`
 - **元信息**：创建日 2026-08-26 / 字符数 27926 / 状态：成熟草案
 - **角色**：机制设计
 - **实现参考维度**：工程化高 —— 11 寄存器固定角色 + 22 验收用例 + 9 项文档修订清单 + 6 项 D-M3-1~6 决策待升级 + 完整 entry/exit 汇编骨架
@@ -122,7 +122,7 @@
 
 ### §2.5 jhyy_gui_subsystem.md
 
-- **路径**：`docs/deep_research/jhyy_gui_subsystem.md`
+- **路径**：`deep_research/jhyy_gui_subsystem.md`
 - **元信息**：创建日 2026-08-26 / 字符数 28731 / 状态：成熟草案
 - **角色**：机制设计
 - **实现参考维度**：概念完整 —— Surface 6 态状态机 + 三账本 ID ledger + IDL 草案 + revoke 4 阶段窗口 + 8 维度验收表
@@ -142,7 +142,7 @@
 
 ### §2.6 result.md
 
-- **路径**：`docs/deep_research/result.md`
+- **路径**：`deep_research/result.md`
 - **元信息**：创建日 2026-08-26 / 字符数 33679 / 状态：成熟草案
 - **角色**：机制设计
 - **实现参考维度**：方法论强（3 段 sprint + 9 项文档修订 diff + 16 项验收矩阵 B1-B16 + 12 项风险与缓解）；论证密度高（8 字节 layout + 5 层表示 + phantom 算法 + D16 算法 + 12 类确定性 checklist）
@@ -167,7 +167,7 @@
 
 ### §2.7 jhyy_OS有效性评估与架构分析.md
 
-- **路径**：`docs/deep_research/jhyy_OS有效性评估与架构分析.md`
+- **路径**：`deep_research/jhyy_OS有效性评估与架构分析.md`
 - **元信息**：创建日 2026-08-28 / 字符数 19050 / 状态：成熟草案（外部审计）
 - **角色**：**机制审查**（不是机制设计）
 - **核心论点摘要**：jhyy_OS 三项创新（Cap 编译期原理 / GUI 线性句柄+epoch revoke / Agent Debug ABI）截至 2026-08 = 「**设计可信、实现待证、领先未证**」；8 项可证伪假设 H1-H8 应优先于功能开发固化；Narrow Waivers 比例决定方案成败（1% vs 10-30%）。
@@ -181,9 +181,9 @@
   - 在进入 M1 前应完成的 8 项最低验证门（per § 8.5）
   - 3 个最小可行实验（capability 派生链 / surface 生命周期 / Agent Debug 对照）未启动
 
-### §2.8 报告§11§12决策与拍板流程说明.markdown
+### §2.8 报告§11§12决策与拍板流程说明.md
 
-- **路径**：`docs/deep_research/报告§11§12决策与拍板流程说明.markdown`
+- **路径**：`deep_research/报告§11§12决策与拍板流程说明.md`
 - **元信息**：创建日 2026-08-27 / 字符数 32228 / 状态：评审中
 - **角色**：**协议规范初稿**(本类共 1 份)
 - **实现参考维度**：决策完整(D-GUI-1 ~ D-GUI-10 决策清单 + ratification gate);协议细节含 topology / wire format / IDL / lifecycle invariants L1-L4 / Shm region ↔ mapping split / 异步 revoke 4 阶段 / seat 策略 / error model / M8d scope & sequencing / acceptance matrix
@@ -192,7 +192,7 @@
 - **本文建议修订 ⇒**：`v3.x-capability-spec.md` §4.1-§4.3 加 `Cap<Shm>` 例外条款;`coordination.md` 加 D-GUI 系列条目;`jhyy-abi-v1.0.0.md` §13 按本协议扩充 cap 类型清单
 - **阻塞项**：
   - D-GUI-8/9/10 + §4.2/§7.2/§8 → 🔒 (2026-09-01,见原 doc §13 revision history)
-  - 当前 draft 形式存在 `docs/deep_research/`,未独立为 `docs/design/gui_protocol.md`
+  - 当前 draft 形式存在 `deep_research/`,未独立为 `docs/design/gui_protocol.md`
 - **已知悬而未决**：
   - wire representation(8 字节 layout + rights encoding + epoch presence 是否进 cap);sprint 3i 落地
   - grace period 默认值;MAX_RECTS;Bytes\<N\> 表示;fourcc registry(均 🔧 IMPLEMENTATION-DEFINED)
@@ -233,7 +233,7 @@
 
 | 文件 | 实现参考维度 | 主要交付物 |
 |---|---|---|
-| `报告§11§12决策与拍板流程说明.markdown` | 决策完整 + IDL / 状态机 / 错误码 | D-GUI-1 ~ D-GUI-10 决策清单 / topology / wire format / IDL / L1-L4 lifecycle invariants / Shm region ↔ mapping split / revoke 4 阶段 / seat 策略 / error model / acceptance matrix |
+| `报告§11§12决策与拍板流程说明.md` | 决策完整 + IDL / 状态机 / 错误码 | D-GUI-1 ~ D-GUI-10 决策清单 / topology / wire format / IDL / L1-L4 lifecycle invariants / Shm region ↔ mapping split / revoke 4 阶段 / seat 策略 / error model / acceptance matrix |
 
 ---
 
@@ -310,7 +310,7 @@ INDEX 仅登记。
 | 设计可证伪假设 / 验证矩阵 | `jhyy_OS有效性评估与架构分析.md` | §8 H1-H8 / §8.5 最低验证门 |
 | 找 9 项修订 diff（sprint kickoff） | `jhyy_v20_研究_执行摘要.md` | §9 项文档修订 |
 | 排期调整 M8d / M12 | `M8d_M12_排期修订.md` | 整文（2 KB） |
-| 起草 GUI 协议规范 / IDL / 决策清单 | `报告§11§12决策与拍板流程说明.markdown` | §0 preamble / §1 topology / §2 cap contracts / §3 wire format / §4 IDL / §5 kernel boundary / §6 revoke / §7 seat / §8 error model / §9 M8d scope / §10 acceptance matrix |
+| 起草 GUI 协议规范 / IDL / 决策清单 | `报告§11§12决策与拍板流程说明.md` | §0 preamble / §1 topology / §2 cap contracts / §3 wire format / §4 IDL / §5 kernel boundary / §6 revoke / §7 seat / §8 error model / §9 M8d scope / §10 acceptance matrix |
 
 ---
 

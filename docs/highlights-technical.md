@@ -1,8 +1,32 @@
-# jhyy_OS 亮点 · 技术版
+# jhyy_OS — 主张 · 技术版
 
-## 8 个 killer features
+## 一句话主张
+
+> **computer-use 是使用计算机的能力。截屏是它今天唯一能用的实现,而且是劣质的那一种。**
+> **Cap\<T\> 是第二种实现 —— OS 直接把能力以类型化契约交给 agent,不走像素。**
+> **新一代 OS 的范式,就是 computer-use 的实现手段从截屏换成 Cap\<T\>。**
+
+推论:jhyy_OS **不引入截屏通道**。这不是"agent 不使用电脑",而是"agent 不靠像素使用电脑"。完整推导见 [v0.0.6-agent-native.md § 1](v0.0.6-agent-native.md)。
+
+## 8 个支柱
+
+下面 8 点**不是并列卖点**,是上面这条主张能不能成立的证据。展开见下方同编号小节。
+
+| 支柱 | 组 | 支撑主张的哪一环 |
+|------|---|-----------------|
+| #1 #6 #8 | **载体** | Cap\<T\> 为什么是**高质量**实现 —— 编译器 / 类型系统 / syscall ABI / kernel 四层协同 |
+| #4 | **前提** | 只有全栈单一语言,服务才可能为 agent 导出类型化 API。混语言就退化成截屏 |
+| #7 | **运维面** | agent 自己定位根因,不必靠人读日志、截图回看 |
+| #2 #3 | **可行性** | 资源可预测,Cap 预算记账才成立 |
+| #5 | **证明** | 不是玩具 —— 系统能跑自己的编译器 |
+
+---
+
+## 展开
 
 ### 1. 能力伪造 = 编译错误
+
+> 支柱组:**载体**
 
 `Cap<File>` 和 `u64` 是不同类型, `as` 转换禁止。
 
@@ -15,6 +39,8 @@ seL4 能力安全做到语言层, 跟 capsicum / Linux patch 区分开。
 
 ### 2. async 成本可见
 
+> 支柱组:**可行性**
+
 `Frame<2KB>` 在签名上, kernel 严格 1 KB / userland 8 KB。
 
 ```jhyy
@@ -25,11 +51,15 @@ async fn read(c: Cap<File>) -> Frame<2KB> { ... }  // 编译期大小可见
 
 ### 3. runtime 不超过 500 行
 
+> 支柱组:**可行性**
+
 `std::async_runtime` ≤ 500 行 jhyy(spawn / join / select / cancel_token / work-stealing)。
 
 跟 tokio 几万行不同, 核心 lib 装得下整个 async 系统。
 
 ### 4. 全栈单一语言
+
+> 支柱组:**前提** —— 这条是范式成立的前提,不是并列卖点。混语言的服务无法为 agent 导出类型化 API,只能退回截屏
 
 kernel + driver + shell + app + build tool 都 jhyy。
 
@@ -37,11 +67,15 @@ kernel + driver + shell + app + build tool 都 jhyy。
 
 ### 5. 自举完整闭环
 
+> 支柱组:**证明**
+
 jhyy 编 jhyy 编 jhyy 编 OS。
 
 Linux(GCC 自举 + kernel 在 GCC 上)接近,但不是单一语言栈;Rust(Redox + rustc)更接近,但编译器自身用 unsafe 写运行时,语言层不保证 kernel 适用;Oberon 也自举,但语言是 1980s 的。**jhyy 的差异化**:单一现代语言栈 + 自举 + 编译期 capability 三者一起做,目前没先例。
 
 ### 6. capability 端到端集成(真杀手锏)
+
+> 支柱组:**载体** —— 这一节是主张本身的实现质量证明
 
 jhyy_OS 的 capability 类型安全 = **编译器层 + 类型系统层 + syscall ABI 层 + kernel 层 全栈协同,编译期类型 + 运行期 tag 双向验证**。
 
@@ -57,6 +91,8 @@ jhyy_OS 的 capability 类型安全 = **编译器层 + 类型系统层 + syscall
 seL4 做不到(手写 C,语言层为零);Capsicum 做不到(Linux patch,只在 syscall 层);CHERI 做不到(硬件,语言层不参与)。**jhyy 第一次四层都做了**。
 
 ### 7. Debug 在语言里(2026-08-04 加)
+
+> 支柱组:**运维面**
 
 solo developer 不依赖 gdb / kdb / printk。debug 是 OS 的语言层 feature。
 
@@ -74,6 +110,8 @@ solo developer 不依赖 gdb / kdb / printk。debug 是 OS 的语言层 feature�
 详见 [v0.0.2-foundation-revision.md § 3.4](v0.0.2-foundation-revision.md) + [v0.0.3-explorations.md § 6](v0.0.3-explorations.md)。
 
 ### 8. Layered TCB + Narrow Waivers(2026-08-04 加)
+
+> 支柱组:**载体**
 
 3 层 trust anchor,99% 编译期 + 1% 运行期 waiver。
 

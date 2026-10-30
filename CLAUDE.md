@@ -15,8 +15,8 @@
 ```
 jhyy_OS/
   CLAUDE.md                  本文件 — 项目说明 + 最高纲领
-  docs/                      设计 doc(已落盘,v0.0.0 → v0.0.1)
-    ├── README.md                              索引
+  docs/                      设计 doc(已落盘,v0.0.0 → v0.0.6)
+    ├── README.md                              索引 + 一句话主张 + 分层说明
     ├── v0.0.0-design.md                       设计骨架
     ├── v0.0.1-design-index.md                 v0.0.1 三章交叉引用
     ├── v0.0.1-syscall-abi.md                  IPC + 进程模型 + 错误码
@@ -24,17 +24,25 @@ jhyy_OS/
     ├── v0.0.1-process-model.md                地址空间 + 线程 + namespace
     ├── v0.0.1.5-M5b-prereqs.md                M5b IPC 实现前置(12 硬条件)
     ├── v0.0.2-foundation-revision.md          spec 校准 + 修订 plan(M1-M11 依赖图)
-    ├── v0.0.3-explorations.md                 5 macro-strategies + 备选架构头脑风暴存档
-    ├── v0.0.4-gui-explorations.md             GUI 集群探索(M8d / M12 候选 + Wayland-style protocol)
+    ├── v0.0.3-explorations.md                 5 macro-strategies + 备选架构头脑风暴存档 🧪
+    ├── v0.0.4-gui-explorations.md             GUI 集群探索(M8d / M12 候选 + Wayland-style protocol) 🧪
+    ├── v0.0.4-debug-abi.md                    DebugEvent 56B + ErrChain + KernelState 🔒
+    ├── v0.0.5-binary-format.md                `.jhyynb` Header 112B 🔒
+    ├── v0.0.6-agent-native.md                 Agent-native OS(CapBundle / Reversibility) 📝
     ├── coordination.md                        OS × compiler 跨边界对齐
     ├── design-log.md                          头脑风暴 + 决策链路
-    ├── highlights-technical.md                8 killer features(技术版)
+    ├── highlights-technical.md                一句话主张 + 8 个支柱(技术版)
     └── highlights-plain-language.md           同上(白话版)
-  src/                OS 源码(待 v1.0.0 后)
-  build/              构建产物 + QEMU image(待 v1.0.0 后)
+  deep_research/          外部深度调研存档 🧪(2026-10-14 从 docs/ 提到仓库根,与 docs/ 同级)
+  src/                    OS 源码(待 v1.0.0 后)
+  build/                  构建产物 + QEMU image(待 v1.0.0 后)
 ```
 
-注:`.claude/` 仅当需要项目级 Claude 配置(settings.local.json 等)时创建,目前不存在。
+注 1:`.claude/` 仅当需要项目级 Claude 配置(settings.local.json 等)时创建,目前不存在。`deep_research/` 是**调研输入**不是设计产出,故不放在 `docs/` 下 —— 引用路径一律 `../deep_research/`(从 `docs/` 内)或 `deep_research/`(从仓库根)。
+
+注 2:**`v0.0.x` 有双重语义** —— 既是文档版本(上表)又是 OS 版本(v0.1.x 起)。且历史上存在两个 `v0.0.4`(gui-explorations 与 debug-abi)。**引用一律用文件名,不用版本号。**
+
+注 3:doc 分三层 —— 🔒 spec(已锁,当规范读)/ 🧪 explore(存档,当背景读)/ 📋 log(过程台账)。分层详情见 `docs/README.md`。
 
 ## Memory
 
@@ -45,11 +53,14 @@ jhyy_OS/
 
 | 意图 | 先看 |
 |------|------|
+| **一句话主张 / 8 个支柱** | `docs/README.md` § 一句话主张 → `docs/highlights-technical.md` |
 | 了解项目状态、设计原则 | 本文件 + memory `project_jhyy_os_kickoff` |
-| 看亮点 / 设计初衷 | `docs/highlights-technical.md` 或 `docs/highlights-plain-language.md` |
+| agent-native 主张的完整推导 | `docs/v0.0.6-agent-native.md` |
 | v0.0.0 完整设计稿 | `docs/v0.0.0-design.md` |
 | v0.0.1 三章联动 design doc | `docs/v0.0.1-design-index.md` |
 | 看 2026-08-04 spec 校准 + M1-M11 依赖图 | `docs/v0.0.2-foundation-revision.md` |
+| 看 Debug ABI(DebugEvent / ErrChain / KernelState) | `docs/v0.0.4-debug-abi.md` |
+| 看二进制格式 `.jhyynb` | `docs/v0.0.5-binary-format.md` |
 | 看 M5b 实施前置(12 硬条件)| `docs/v0.0.1.5-M5b-prereqs.md` |
 | 看 OS × compiler 跨边界问题 | `docs/coordination.md` |
 | 看 raw 头脑风暴存档 | `docs/v0.0.3-explorations.md` |
@@ -73,15 +84,19 @@ jhyy_OS/
 | 文档 | 状态 | 用途 |
 |------|------|------|
 | memory(以 `MEMORY.md` 为权威) | — | 见 `MEMORY.md` 索引 |
+| `docs/README.md` | 持续更新 | **入口**:一句话主张 + 文档三层分层 + 全清单 |
 | `docs/v0.0.0-design.md` | 已锁(讨论稿) | 设计骨架:使命 / 五约束 / 开放维度 / 11 milestones |
 | `docs/v0.0.1-*.md`(3 章) | 草案 | syscall-abi / capability / process-model 三章联动 + index |
 | `docs/v0.0.1.5-M5b-prereqs.md` | 已落盘(2026-08-04) | M5b IPC 实施前置(12 硬条件) |
 | `docs/v0.0.2-foundation-revision.md` | 已落盘(2026-08-04) | spec 校准 + 修订 plan + M1-M11 依赖图 + MVP coding style |
-| `docs/v0.0.3-explorations.md` | 已落盘(2026-08-04) | 5 macro-strategies + 备选架构 + MVP 最小集(头脑风暴存档) |
-| `docs/v0.0.4-gui-explorations.md` | 已落盘(2026-08-05) | GUI 集群探索(M8d / M12 候选 + Wayland-style 协议草案 + 推荐候选 C 两阶段) |
-| `docs/coordination.md` | 持续追加 | OS × compiler 跨边界对齐 + 12 个 Q-OS/Q-Compiler |
+| `docs/v0.0.4-debug-abi.md` | 🔒 Locked | DebugEvent 56B + ErrChain 64B + KernelState + ProvenanceInfo DAG |
+| `docs/v0.0.5-binary-format.md` | 🔒 Locked | `.jhyynb` Header 112B + OS 端实施要点 |
+| `docs/v0.0.6-agent-native.md` | 📝 拟锁定 | Agent-native OS:CapBundle / Reversibility / 模型资源层预留 / M8d 禁截图 |
+| `docs/v0.0.3-explorations.md` | 🧪 已落盘(2026-08-04) | 5 macro-strategies + 备选架构 + MVP 最小集(头脑风暴存档,**非决定**) |
+| `docs/v0.0.4-gui-explorations.md` | 🧪 已落盘(2026-08-05) | GUI 集群探索(M8d / M12 候选 + Wayland-style 协议草案,**非决定**) |
+| `docs/coordination.md` | 持续追加 | OS × compiler 跨边界对齐 + §0 critical path + D1–D44 + Q-OS/Q-Compiler |
 | `docs/design-log.md` | 持续记录 | 完整头脑风暴 + 决策链路(2026-08-03 ~ 08-04)|
-| `docs/highlights-*.md` | 持续更新 | 8 killer features(技术 + 白话)|
+| `docs/highlights-*.md` | 持续更新 | 一句话主张 + 8 个支柱(技术 + 白话)|
 
 ## 提交规则(参照 [JiHuiYiYou/docs/internal/conventions.md](https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/docs/internal/conventions.md) § 提交规则)
 
