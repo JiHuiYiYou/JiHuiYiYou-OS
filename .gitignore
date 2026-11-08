@@ -29,6 +29,7 @@ __pycache__/
 
 # Claude Code 本地配置（按 CLAUDE.md，仅当需要项目级配置时创建）
 .claude
+CLAUDE.md
 
 # codegraph 索引（daemon.pid mtime 抖动会污染 git status）
 .codegraph/
